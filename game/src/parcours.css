@@ -1,0 +1,103 @@
+/*
+ * Copyright 2017 The boardgame.io Authors
+ *
+ * Use of this source code is governed by a MIT-style
+ * license that can be found in the LICENSE file or at
+ * https://opensource.org/licenses/MIT.
+ */
+
+body { 
+  font-family: sans-serif;
+  color: white;
+}
+
+.pink { background-color: pink !important }
+.black { background-color: black !important }
+.green { background-color: green !important }
+.blue { background-color: blue !important }
+
+.panel { 
+  float: left; 
+  display: inline-block;
+  margin-right: 1em;
+}
+
+.panel > div {
+  margin: 1em;
+  padding: .25em;
+}
+
+#parcours {
+  border-collapse: collapse;
+  font-family: monospace;
+  width: auto;
+  display: inline-block;
+}
+
+  .sector { 
+    color:      white;
+    border:     1px solid black;
+    list-style: none; 
+    background-color: gray; 
+    padding: 1em;
+  }
+  .F {  }
+  .H { background-color: blue; }
+  .M { background-color: red; }
+  .D { background-color: green; }
+
+  li input[type="text"] { 
+    padding: .25em; 
+    width: 3em; 
+    text-align: center;
+    margin: 0 1em;
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+  }
+
+  li input.occupied {}
+
+#gameState {
+  color: black;
+}
+
+#teams {
+  border: 1px solid black;
+  display: inline-block;
+}
+
+#teams li { list-style: none }
+
+.team { 
+  border:   1px solid black; 
+  margin:   1em;
+  padding:  .5em;
+}
+
+#winner {
+  margin-top: 25px;
+  width: 168px;
+  text-align: center;
+}
+
+td {
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+  color: #555;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  border: 3px solid #aaa;
+  background: #fff;
+}
+
+td.active {
+  cursor: pointer;
+  background: #eeffe9;
+}
+
+td.active:hover {
+  background: #eeffff;
+}
