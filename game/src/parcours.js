@@ -7,8 +7,6 @@ import './parcours.css';
 class Parcours extends React.Component {
   constructor(props) {
     super(props);
-    this.sectors = this.SpawnSectors();
-    this.SetupStartGrid();
   }
 
   static propTypes = {
@@ -19,52 +17,16 @@ class Parcours extends React.Component {
     isMultiplayer: PropTypes.bool,
   };
 
-  onClick = (whatGotClicked , id) => {
+  onClick = (whatGotClicked, id) => {
+
     if (whatGotClicked === "spot" && this.props.ctx.phase == "staging") {
-      this.StageRider(id);
-      this.props.events.endTurn();
-      console.log( "Riders to be placed: ", this.props.G.racers.filter(element => element.currentSpot === null).length );
-      if (this.props.G.racers.filter(element => element.currentSpot === null).length === 0) {
-        console.log("ALL RACERS PLACED!");
-        this.props.events.endPhase();
-      }
+      this.props.moves.StageRider(id);
+      this.props.events.endTurn();   // move to moveLimit?
     }
 
     if (whatGotClicked === "cardSelect" && id != undefined) {
       this.props.moves.SelectCard(id);
     }
-  }
-
-  getCurrentPlayerUnstagedRacers = (racers) => {
-    return racers.player == this.props.ctx.currentPlayer && racers.currentSpot === null;
-  }
-
-  StageRider = (spot) => {
-    let racer = this.props.G.racers.find(this.getCurrentPlayerUnstagedRacers);
-    //this.props.moves.StageRider();
-    if (racer !== false) {
-      racer.currentSpot = spot;
-    }
-  }
-
-  SetupStartGrid() {
-    console.log("SETTING UP START GRID");
-    this.props.G.teams.forEach((team,i)=> {      //for each team drop their rider into the racers collection 
-      team.riders.forEach((rider,j) => {
-          rider.color = team.color;
-          rider.player = team.player;
-          rider.currentSpot = null;
-          this.props.G.racers.push(rider);
-        });
-    });
-    console.log(this.props.G.racers.length + ' RACERS ENTERED');
-
-  }
-
-  SpawnSectors() {
-    console.log("SPAWNING SECTORS");
-    let secs = Array.from("FFFFHFHFHFFFMMMMFFFMMDDDDDDFFFHHMMMMFFF"); // eventually move this to a config or user option
-    return secs;
   }
 
   render() {
@@ -73,8 +35,8 @@ class Parcours extends React.Component {
         <div id="parcours" className="panel">
           <ul>
               {
-                this.sectors.map((sector, id) => 
-                    <Sector G={this.props.G} key={id.toString()} handleClick={this.onClick} id={id.toString()} type={sector.toString()} />
+                this.props.G.sectors.map((sector, id) => 
+                    <Sector  sector={sector} G={this.props.G} key={id.toString()} handleClick={this.onClick} id={id} />
                 )
               }      
           </ul>
@@ -84,9 +46,9 @@ class Parcours extends React.Component {
           <div id="gameState">Phase: { this.props.ctx.phase } </div>
           <div id="teams">
             {
-              this.props.G.teams.map( (team, i) => 
-                <Team handleClick={this.onClick} key={i} id={i} team={team} racers={this.props.G.racers.filter(racer => racer.player == team.player)} />
-              )
+                this.props.G.teams.map( (team, i) => 
+                  <Team handleClick={this.onClick} key={i} id={i} team={team} racers={this.props.G.racers.filter(racer => racer.player == team.player)} />
+                )
             }
           </div>
         </div>
@@ -97,21 +59,30 @@ class Parcours extends React.Component {
 
 export default Parcours;
 
-const Team = ({ handleClick, team, racers, id }) => {
-  let className = "team " + team.color.toString();
-  //let racers = this.props.G.racers.filter(racer => racer.player == team.player);
-  return (
-    <div className={className}>
-      <li>Team: {team.color} ({id})</li>
-      <li><button onClick={() => handleClick('cardSelect',team.player)}>Select a Card</button></li>
-      {
-        racers.filter(racer => racer.player == team.player)
-              .map( (racer,i) => 
-              <Racer key={i} racer={racer} />
-              )
-      }
-    </div>
+class Team extends React.Component {
+  constructor(props) {
+    super(props);
+    //this.state = {date: new Date()};
+    this.className = "team " + props.team.color.toString();
+    this.player = props.team.player;
+  }
+
+  render() {
+    return (
+      <div className={this.className}>
+        <li>Team: {this.props.team.color} ({this.props.id})</li>
+        <li><button onClick={() => this.props.handleClick('cardSelect',this.props.team.player)}>Select a Card</button></li>
+        {
+          this.props.racers.filter(racer => racer.player == this.props.team.player)
+                .map( (racer,i) => 
+                <Racer key={i} racer={racer} />
+                )
+        } 
+      </div>
     );
+
+  }
+
 }
 
 const Racer = ({ racer }) => {
@@ -120,30 +91,35 @@ const Racer = ({ racer }) => {
   );
 }
 
-const Sector = ({ G, handleClick, type, id }) => {
-  let spots = [1,2,3];    // eventually move this to the SpawnSectors 
+const Sector = ({ G, handleClick, sector, id }) => {
+  // sector should have sector.type and sector.width
+  //let spots = [1,2,3];    // eventually move this to the SpawnSectors 
+  let spots = [];
+
+  for (let i=0; i<sector.width; i++) {
+    spots.push(
+        <Spot 
+            G={G} 
+            sector={id}
+            num={i} 
+            key={id.toString()+i.toString()} 
+            handleClick={handleClick}
+            /> 
+      )
+  }
 
   return (
-    <li className={'sector ' + type.toString()}>
-      {type}
-      { 
-        spots.map((spot,i) => 
-        <Spot 
-              G={G} 
-              id={id.toString()+i.toString()} 
-              key={id.toString()+i.toString()} 
-              handleClick={handleClick}
-              /> 
-        )
-      }
+    <li className={'sector ' + sector.type.toString()}>
+      {sector.type}
+      {spots}
     </li>
   );
 }
 
-const Spot = ({ G, handleClick, id }) => {
+const Spot = ({ G, handleClick, sector, num }) => {
   let text = "";
   let className = "";
-  let occupant = G.racers.find( element => element.currentSpot == id );
+  let occupant = (G.racers) ? G.racers.find( element => element.currentSpot.join() == Array(sector,num).join()) : null;
   
   if (occupant != undefined) {
     text = occupant.color[0] + occupant.type[0];
@@ -151,6 +127,6 @@ const Spot = ({ G, handleClick, id }) => {
   }
 
   return (
-    <input type="text" onClick={() => handleClick('spot',id)} readOnly racer="0" className={className.toString()} value={text.toString()}/>
+    <input type="text" onClick={() => handleClick('spot',Array(sector,num))} readOnly racer="0" className={className.toString()} value={text.toString()}/>
   );
 }
