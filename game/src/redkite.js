@@ -46,15 +46,26 @@ const RedKite = {
         //sort racers, because we will move from front to back
         G.racers.sort( (a,b) => ( a.currentSpot < b.currentSpot ) ? 1 : -1);
 
+        let targetSpot = [];
         //execute moves
         G.racers.forEach( (racer) => {
           racer.prevSpot = racer.currentSpot;
-          racer.currentSpot[0] += racer.cardToPlay;
+          targetSpot = [...racer.currentSpot];
+
+          targetSpot[0] += racer.cardToPlay;                //move rider to new sector
+          targetSpot[1] = G.sectors.targetSpot[0].width-1;  //automatically move them to the end spot of that sector
+          //replace above line with logic that slots them into a free spot if available.
+          //if not, place in prior sector ... if prior sector full, continue on down
+
+          //check to see if targetSpot is already filled. if so, move to 
+          console.log("%s %s has moved %i from %o to %o", racer.color, racer.type, racer.cardToPlay, racer.currentSpot.toString(), targetSpot.toString());
+
+//          console.log("currentSpot spot ", JSON.parse(JSON.stringify(racer.prevSpot)));  
+//          console.log("target spot ", JSON.parse(JSON.stringify(targetSpot)));  
+//          racer.currentSpot[0] += racer.cardToPlay;
           racer.cardToPlay = null;
           //TODO NEXT: correctly resolve player moves w/ sector and spot numbers
         });
-
-        console.log(G.racers);
       },
       endIf: (G, ctx) => {
         return G.racers.filter(element => element.cardToPlay !== null).length == 0;
