@@ -18,7 +18,6 @@ body {
 
 .panel { 
   float: left; 
-  display: inline-block;
   margin-right: 1em;
 }
 
@@ -33,6 +32,11 @@ body {
   width: auto;
   display: inline-block;
 }
+
+  #parcours .scrollWell {
+    overflow: scroll;
+    height: 100vh;
+  }
 
   .sector { 
     color:      white;
@@ -75,29 +79,7 @@ body {
   padding:  .5em;
 }
 
-#winner {
-  margin-top: 25px;
-  width: 168px;
-  text-align: center;
-}
+#actions { 
+  color: black; 
 
-td {
-  text-align: center;
-  font-weight: bold;
-  font-size: 25px;
-  color: #555;
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  border: 3px solid #aaa;
-  background: #fff;
-}
-
-td.active {
-  cursor: pointer;
-  background: #eeffe9;
-}
-
-td.active:hover {
-  background: #eeffff;
 }
