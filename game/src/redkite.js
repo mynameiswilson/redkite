@@ -47,13 +47,28 @@ const RedKite = {
         // resolve the CARDS TO PLAY
         console.log("RESOLVING MOVES");
     
-        // work from finish line backwards to resolve moves
-        // essentially, the front rider gets to move first
-        // remember that spot "0" is the lead
+        // SECTOR / SPOTS visualization
+        //    spots 0  1  2
+        // sector 0            
+        // sector 1 ps pr gs   
+        // sector 2 br 
+        // sector 3          <-- a 1-sector gap is "closeable" by drafting
+        // sector 4 gr 
+        // sector 5 
+        // sector 6          <-- a 2-sector gap is not.
+        // sector 7 bs
 
+        //TODO: add sector-specific rules
+        // Mountains: no moves over 5 if you start on or might move through a mountain, no drafting
+        // Hills: ??? tbd
+        // Descents: minimum of speed 5
+        // Cobbles: max speed 7, no drafting
 
         // LET RIDERS PLAY THEIR CARDS 
         let foundFirstRider = false;
+        let lastSectorWithRacer = 0;
+
+
 
         for (let i = G.sectors.length-1; i >=0; i--) {
           for (let spotIndex = 0; spotIndex < G.sectors[i].spots.length; spotIndex++) {
@@ -106,7 +121,7 @@ const RedKite = {
         let weAreSheltered = false;
         for (let i = G.sectors.length-1; i > 0; i--) {                            //for each sector
           if (G.sectors[i].spots.some(element => typeof element === "object")) {  // if there are riders in this sector
-                        
+            lastSectorWithRacer = i;            
             if (!weAreSheltered) {                                                  // and they are not sheltered
               G.sectors[i].spots.forEach( racer => {                              // for each racer
                 if (typeof racer === "object") {
@@ -118,6 +133,9 @@ const RedKite = {
             }
           } else weAreSheltered = false;                                          // if there are NO riders, there is no shelter in this sector
         }
+
+        //scroll view, ensure last rider in race is in there
+        document.getElementById('sector'+(lastSectorWithRacer-1)).scrollIntoView();
 
       },
       endIf: (G, ctx) => {
