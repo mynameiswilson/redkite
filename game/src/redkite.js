@@ -318,16 +318,6 @@ function SetupRacers(G) {
   });
 }
 
-// Return true if `cells` is in a winning configuration.
-function IsVictory(sectors) {
-  return false; 
-}
-
-// Return true if all `cells` are occupied.
-function IsDraw(sectors) {
-  //return sectors.filter(c => c === null).length === 0;
-}
-
 function SelectCard(G, ctx, player) {
   console.log("SELECTING CARDS for PLAYER ", player);
 
