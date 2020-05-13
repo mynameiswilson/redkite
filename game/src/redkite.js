@@ -5,13 +5,17 @@ const RedKite = {
   name: "redkite",
 
   setup: (ctx) => ({ 
-    sectors: SpawnSectors("FFFFHFHFHF2F2F2M2M2M2M2F2F2F2M2M2DDDDDDFFFHHMMMMFFF",3), //eventually move this to some config
-    teams: SpawnTeams(ctx),
+    startLength: 5,
+    finishLength: 5,
+    startFinishWidth: 2, 
+    finishLine: 0,          // the sector that represents the finish line
+    sectors: [],
+    teams: [],
     actionLog: [],
     autostage: true,        // if we are auto-staging riders (for dev)
     defaultSectorWidth: 3,
+    results: [],
   }),
-
 
   phases: {
 
@@ -19,6 +23,8 @@ const RedKite = {
       start: true,
       moves: { StageRider },
       onBegin: (G, ctx) => {
+        SpawnSectors("FFFFFFFFFHFHFHF2F2F2M2M2M2M2F2F2F2M2M2DDDDDDFFFHHMMMMFFF",G,ctx); //eventually move this to some config
+        SpawnTeams(G,ctx);
         SetupRacers(G);
       },
       endIf: (G, ctx) => {
@@ -58,17 +64,17 @@ const RedKite = {
         // sector 6          <-- a 2-sector gap is not.
         // sector 7 bs
 
-        //TODO: add sector-specific rules
+        //TODO: add sector-specific rules 
         // Mountains: no moves over 5 if you start on or might move through a mountain, no drafting
         // Hills: ??? tbd
         // Descents: minimum of speed 5
         // Cobbles: max speed 7, no drafting
 
+        //TODO: add finish sector / vicotry
+
         // LET RIDERS PLAY THEIR CARDS 
         let foundFirstRider = false;
         let lastSectorWithRacer = 0;
-
-
 
         for (let i = G.sectors.length-1; i >=0; i--) {
           for (let spotIndex = 0; spotIndex < G.sectors[i].spots.length; spotIndex++) {
@@ -94,7 +100,7 @@ const RedKite = {
 
         //APPLY DRAFTING RULES
         console.log("Applying drafting rules")
-        for (let i = G.sectors.length-1; i >=2; i--) {
+        for (let i = G.sectors.length-1; i >=2; i--) {                                  //TODO official rules say you apply slipstreaming from BACK to FRONT
             if (G.sectors[i].spots.some(element => typeof element === "object")) {      //if there is at least one rider in this sector
 
               if (                                                                      //check for gaps. There is a gap if:
@@ -110,6 +116,25 @@ const RedKite = {
                   });
 
               } // end if is there a one-sector gap back to next rider
+
+            } // end if is there a rider in this sector
+
+        } // for each SECTOR
+
+        //LOOKING FOR WINNERS
+        console.log("Looking for winners")
+        for (let i = G.sectors.length-1; i >=2; i--) {                                  //TODO official rules say you apply slipstreaming from BACK to FRONT
+            if (G.sectors[i].spots.some(element => typeof element === "object")) {      //if there is at least one rider in this sector
+
+              if (i >= G.finishLine) {
+                G.sectors[i].spots
+                .filter( element => typeof element === "object")
+                .forEach( (racer) => { 
+                  G.results.push(racer); 
+                  ActionLog(G,"%s %s has finished %i",racer.color, racer.type, G.results.length);
+                });
+
+              }
 
             } // end if is there a rider in this sector
 
@@ -160,11 +185,8 @@ const RedKite = {
   },
 
   endIf: (G, ctx) => {
-    if (IsVictory(G.sectors)) {
+    if (G.results.length > 0) {               // TODO this could be better.
       return { winner: ctx.currentPlayer };
-    }
-    if (IsDraw(G.sectors)) {
-      return { draw: true };
     }
   },
 
@@ -176,6 +198,8 @@ export default RedKite;
 function PlaceRacerInSector(G,sectornum,racer) {
 
   if (sectornum > 0 || !G.sectors[sectornum]) {
+
+    if (sectornum > G.sectors.length) { sectornum = G.sectors.length-1 }
 
     let placed = false;
     for (let i = 0; i < G.sectors[sectornum].spots.length; i++) {
@@ -197,22 +221,20 @@ function PlaceRacerInSector(G,sectornum,racer) {
   } else console.log("can't place rider in sector %i, it doesn't exist", sectornum)
 }
 
-
 function ActionLog(G,action, ...replacements) {
   if (G) G.actionLog.push(vsprintf(action,replacements))
     else console.log("Must pass G to ActionLog");
 }
 
-
-function SpawnSectors(sectormap, defaultSectorWidth) {
+function SpawnSectors(sectormap, G, ctx) {
   console.log("SPAWNING SECTORS");
-  let sectors = sectormap.match(/\S\d?/g);  // eventually move this to a config or user option
+  let sectors = [];
+  sectors = sectormap.match(/\S\d?/g);  // split sectormap in to individual sector definitions 
 
   sectors = sectors.map( sector => {
-
     let newSector = Array.from(sector);
-    
-    if (newSector.length === 1) {  newSector.push(defaultSectorWidth) }
+
+    if (newSector.length === 1) {  newSector.push(G.defaultSectorWidth) }
     else newSector[1] = parseInt(newSector[1])
     
     newSector = {
@@ -220,14 +242,35 @@ function SpawnSectors(sectormap, defaultSectorWidth) {
       'width': newSector[1],
       'spots': Array(newSector[1]).fill(0),
     }
-    
     return newSector;
   });
 
-  return sectors;
+  for (let i = 0; i < G.startLength; i++) {
+    sectors.unshift(
+      {
+        'type':  'S',
+        'width': G.startFinishWidth,
+        'spots': Array(G.startFinishWidth).fill(0),
+      }
+    );
+  }
+
+  G.finishLine = sectors.length;
+
+  for (let i = 0; i < G.finishLength; i++) {
+    sectors.push(
+      {
+        'type':  'X',
+        'width': G.startFinishWidth,
+        'spots': Array(G.startFinishWidth).fill(0),
+      }
+    );
+  }
+
+  G.sectors = sectors;
 }
 
-function SpawnTeams(ctx) {
+function SpawnTeams(G,ctx) {
   console.log("SPAWNING TEAMS");
   const colors = ['black','blue','green','pink'];
   let teams = [];
@@ -238,7 +281,8 @@ function SpawnTeams(ctx) {
       'riders':       [SpawnSprinter(), SpawnRouleur()],
     });
   });
-  return teams;
+
+  G.teams = teams;
 }
 
 function SpawnSprinter() {
@@ -251,16 +295,13 @@ function SpawnRouleur() {
 
 function GetRacers(G) {
   let racers = [];
-
   G.sectors.forEach( 
   (sector) => { 
     sector.spots.forEach( (spot) => { 
       if (typeof spot == "object") racers.push (spot);
     });
   }) 
-
-  return racers; 
-        
+  return racers;    
 }
 
 function SetupRacers(G) {
@@ -270,12 +311,11 @@ function SetupRacers(G) {
         rider.color = team.color;       //copy color and player # down to the rider level for ease of use
         rider.player = team.player;
         if (G.autostage) {
-          rider.currentSpot = [i,j];
-          G.sectors[i].spots[j] = rider;
+          rider.currentSpot = [G.startLength-i-1,j];
+          G.sectors[G.startLength-i-1].spots[j] = rider;
         } 
       });
   });
-
 }
 
 // Return true if `cells` is in a winning configuration.
@@ -306,9 +346,7 @@ function PlayCard(G, ctx) {
 }
 
 function StageRider(G, ctx, spot) {
-    
     GetRacers(G).find(racer => (racer.player === ctx.currentPlayer && racer.currentSpot === null)).currentSpot = spot;
-
 }
 
 

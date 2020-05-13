@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './parcours.css';
 
-
 class Parcours extends React.Component {
   static propTypes = {
     G: PropTypes.any.isRequired,
