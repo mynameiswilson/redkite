@@ -149,8 +149,16 @@ class Team extends React.Component {
 }
 
 const Racer = ({ racer }) => {
+
+  const add = (a, b) => a + b
+  let currentEnergy = racer.deck.reduce(add) 
+  let averageEnergy = currentEnergy / racer.deck.length;
+
   return (
-    <li>{ racer.color[0]+racer.type[0] }: {racer.cardToPlay}</li>
+    <li>{ racer.color[0]+racer.type[0] }: {racer.cardToPlay}<br/>
+    { currentEnergy } / { racer.startEnergy }<br/>
+    { averageEnergy.toPrecision(2) }
+    </li>
   );
 }
 
@@ -170,7 +178,7 @@ const Sector = ({ sector, handleClick, id }) => {
 
   return (
     <li id={"sector"+id}   className={'sector ' + sector.type.toString()}>
-      {sector.type} {id}
+      <div class="label">{sector.type} {id}</div>
       {spots}
     </li>
   );
@@ -181,7 +189,7 @@ const Spot = ({ racer, sectorid, spotid, handleClick }) => {
   let className = "";
   
   if (racer.hasOwnProperty("color") && racer.hasOwnProperty("type")) {
-    text = racer.color[0] + racer.type[0] + (racer.drafting ? "⇣" : "");
+    text = racer.color[0] + racer.type[0] + (racer.drafting ? "↠" : "");
     className = racer.color;
   }
 

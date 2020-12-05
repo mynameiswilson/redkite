@@ -15,6 +15,7 @@ const RedKite = {
     autostage: true,        // if we are auto-staging riders (for dev)
     defaultSectorWidth: 3,
     results: [],
+    fatigueCard: 2,         // fatigue card value
   }),
 
   phases: {
@@ -23,7 +24,7 @@ const RedKite = {
       start: true,
       moves: { StageRider },
       onBegin: (G, ctx) => {
-        SpawnSectors("FFFFFFFFFHFHFHF2F2F2M2M2M2M2F2F2F2M2M2DDDDDDFFFHHMMMMFFF",G,ctx); //eventually move this to some config
+        SpawnSectors("FFFFFFFHHHFFFFHHHF2F2F2M2M2M2M2F2F2F2M2M2M2M2M2M2DDDDDDFFFHHMMMMFFF",G,ctx); //eventually move this to some config
         SpawnTeams(G,ctx);
         SetupRacers(G);
       },
@@ -150,8 +151,8 @@ const RedKite = {
             if (!weAreSheltered) {                                                  // and they are not sheltered
               G.sectors[i].spots.forEach( racer => {                              // for each racer
                 if (typeof racer === "object") {
-                  console.log("%s %s is tiring at the front", racer.color, racer.type);
-                  racer.deck.push(1); //toss a fatigue card in there              // shuffle a "1" fatigue card into their deck
+                  ActionLog(G,"%s %s is tiring at the front leading their group", racer.color, racer.type);
+                  racer.deck.push(G.fatigueCard); //toss a fatigue card in there  // shuffle a "2" (default) fatigue card into their deck
                 }
               });
               weAreSheltered = true;                                              // and mark next sector as sheltered
@@ -286,11 +287,11 @@ function SpawnTeams(G,ctx) {
 }
 
 function SpawnSprinter() {
-  return { "type" : "sprinter" , "deck" : [2,2,2,3,3,3,4,4,4,5,5,5,9,9,9], "cardToPlay": null, "currentSpot": null, drafting: false };
+  return { "type" : "sprinter" , "deck" : [2,2,2,3,3,3,4,4,4,5,5,5,9,9,9], "startEnergy": 69, "cardToPlay": null, "currentSpot": null, drafting: false };
 }
 
 function SpawnRouleur() {
-  return { "type" : "rouleur" , "deck" : [ 3,3,3,4,4,4,5,5,5,6,6,6,7,7,7], "cardToPlay": null, "currentSpot": null, drafting: false };
+  return { "type" : "rouleur" , "deck" : [ 3,3,3,4,4,4,5,5,5,6,6,6,7,7,7], "startEnergy": 75, "cardToPlay": null, "currentSpot": null, drafting: false };
 }
 
 function GetRacers(G) {

@@ -22,7 +22,7 @@ body {
 }
 
 .panel > div {
-  margin: 1em;
+  margin: 0em;
   padding: .25em;
 }
 
@@ -34,30 +34,42 @@ body {
 }
 
   #parcours .scrollWell {
-    overflow: scroll;
-    height: 100vh;
+    /*overflow: scroll;
+    height: 100vh;*/
+    overflow: auto;
   }
 
   .sector { 
+    position:relative;
     color:      white;
     border:     1px solid black;
     list-style: none; 
     background-color: gray; 
-    padding: 1em;
+    padding:    1em;
+    float: left; 
   }
+
+
   .F {  }
   .H { background-color: blue; }
   .M { background-color: red; }
   .D { background-color: green; }
 
-  li input[type="text"] { 
-    padding: .25em; 
-    width: 3em; 
+  .sector input[type="text"] { 
+    padding:    .25em; 
+    width:      2em; 
     text-align: center;
-    margin: 0 1em;
+    margin:     0 0em;
     background-color: gray;
     color: white;
     font-weight: bold;
+    display: block;
+  }
+
+  .sector .label { 
+    position: absolute;
+    top: 0; left: 0;
+    background: #000;
   }
 
   li input.occupied {}
@@ -77,6 +89,7 @@ body {
   border:   1px solid black; 
   margin:   1em;
   padding:  .5em;
+  float: left; 
 }
 
 #actions { 
